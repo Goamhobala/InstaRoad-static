@@ -1,0 +1,90 @@
+/* InstaGeo's palette, carried over from new_apps/frontend/src/theme.js:
+   #2196f3 primary on the #1a1a2e / #16213e dark ground. Plain CSS rather than
+   MUI — the demo needs a palette and a layout, not a 300 KB component library,
+   and react-scripts 5 + React 19 is a build risk on Render for no gain. */
+:root {
+  --blue: #2196f3;  --blue-dim: #1976d2;  --blue-lo: #64b5f6;
+  --bg: #1a1a2e;    --paper: #16213e;     --panel: #1e2749;
+  --line: #2c3a63;  --fg: #ffffff;        --muted: #9aa6c4;
+  --test: #2196f3;  --val: #9c7bd8;       --train: #6b7280;
+  --ok: #4ade80;    --warn: #fbbf24;
+}
+* { box-sizing: border-box; }
+html, body, #root { height: 100%; margin: 0; }
+body {
+  background: var(--bg); color: var(--fg);
+  font: 14px/1.5 -apple-system, BlinkMacSystemFont, "Segoe UI", Roboto, sans-serif;
+}
+.app { display: grid; grid-template-rows: auto 1fr; height: 100%; }
+header {
+  padding: 14px 20px; border-bottom: 1px solid var(--line); background: var(--paper);
+  display: flex; align-items: baseline; gap: 14px; flex-wrap: wrap;
+}
+header h1 { margin: 0; font-size: 17px; font-weight: 650; letter-spacing: .2px; }
+header .sub { color: var(--muted); font-size: 12.5px; }
+.main { display: grid; grid-template-columns: 1fr 420px; min-height: 0; }
+@media (max-width: 900px) { .main { grid-template-columns: 1fr; } }
+.mapwrap { min-height: 0; position: relative; }
+.leaflet-container { height: 100%; width: 100%; background: var(--bg); }
+/* InstaGeo's dark-mode tile filter (constants.js DARK_MODE_MAP_FILTER) */
+.leaflet-tile-pane { filter: invert(.94) hue-rotate(220deg) brightness(1.5) saturate(.5); }
+
+aside {
+  border-left: 1px solid var(--line); background: var(--paper);
+  overflow-y: auto; padding: 16px; min-height: 0;
+}
+aside h2 { margin: 0 0 2px; font-size: 15px; }
+aside .meta { color: var(--muted); font-size: 12.5px; margin-bottom: 14px; }
+section { margin-bottom: 20px; }
+section > label {
+  display: block; font-size: 11px; letter-spacing: .09em; text-transform: uppercase;
+  color: var(--muted); margin-bottom: 7px;
+}
+.row { display: flex; gap: 6px; flex-wrap: wrap; }
+button {
+  font: inherit; color: var(--fg); background: var(--panel);
+  border: 1px solid var(--line); border-radius: 7px; padding: 7px 11px; cursor: pointer;
+}
+button:hover:not(:disabled) { border-color: var(--blue); }
+button[aria-pressed="true"] { background: var(--blue-dim); border-color: var(--blue-lo); }
+button:disabled { opacity: .4; cursor: not-allowed; }
+button.run {
+  width: 100%; padding: 11px; font-weight: 600; background: var(--blue-dim);
+  border-color: var(--blue); box-shadow: 0 4px 15px rgba(33,150,243,.3);
+}
+.badge {
+  display: inline-block; padding: 1px 7px; border-radius: 999px;
+  font-size: 11px; font-weight: 600; vertical-align: 1px;
+}
+.badge.test  { background: rgba(33,150,243,.2);  color: var(--test);  }
+.badge.val   { background: rgba(156,123,216,.2); color: var(--val);   }
+.badge.train { background: rgba(107,114,128,.25); color: #b6bdcc;     }
+
+/* The 5x5 sheet. aspect-ratio keeps cells square at any panel width. */
+.sheet { display: grid; gap: 3px; }
+.cell {
+  position: relative; aspect-ratio: 1; border-radius: 3px; overflow: hidden;
+  background: #0d1428 center/cover no-repeat; border: 1px solid transparent;
+  cursor: pointer; padding: 0;
+}
+.cell.missing { background: repeating-linear-gradient(45deg,#141b33 0 6px,#0d1428 6px 12px);
+                cursor: not-allowed; }
+.cell.sel { border-color: var(--blue); box-shadow: 0 0 0 2px rgba(33,150,243,.45) inset; }
+.cell .sub {
+  position: absolute; inset: 0; display: grid; pointer-events: none;
+}
+.cell .sub i { border: .5px dashed rgba(255,255,255,.22); }
+.cell .sub i.on { background: rgba(33,150,243,.42); border-color: var(--blue-lo); }
+
+.note { font-size: 12.5px; color: var(--muted); }
+.note.warn { color: var(--warn); }
+.legend { display: flex; gap: 12px; font-size: 12px; color: var(--muted); flex-wrap: wrap; }
+.legend i { display: inline-block; width: 9px; height: 9px; border-radius: 2px; margin-right: 5px; }
+.results { display: grid; gap: 8px; }
+.results img { width: 100%; border-radius: 6px; border: 1px solid var(--line); display: block; }
+.results figcaption { font-size: 11.5px; color: var(--muted); margin-top: 3px; }
+kbd {
+  font: 11.5px/1.4 ui-monospace, SFMono-Regular, Menlo, monospace;
+  background: var(--panel); border: 1px solid var(--line);
+  border-radius: 4px; padding: 1px 5px;
+}
