@@ -6,6 +6,19 @@ import { MODELS, SIZES, SPLIT_STYLE, TILE_PX } from './config'
 
 const load = (f) => fetch(`${import.meta.env.BASE_URL}data/${f}`).then((r) => r.json())
 
+/** ZeroGPU bills its daily quota to the CALLER, so an anonymous visitor gets a
+ *  small allowance shared by IP. Exhausting it surfaces as a raw error string;
+ *  say what actually happened instead of showing the visitor a stack trace. */
+function humanError(e) {
+  const s = String(e?.message ?? e ?? '')
+  if (/ZeroGPU|quota|runs limit/i.test(s))
+    return 'This Space\u2019s free GPU allowance for your network is used up for today. '
+         + 'Signing in to Hugging Face raises it; otherwise it resets in 24 h.'
+  if (/metadata could not be loaded|Failed to fetch/i.test(s))
+    return 'Could not reach the inference Space \u2014 it may be asleep. Give it a minute and retry.'
+  return s || 'Inference failed.'
+}
+
 export default function App() {
   const [data, setData] = useState(null)
   const [site, setSite] = useState(null)
@@ -43,7 +56,7 @@ export default function App() {
       setOut(await predict({ site: site.id, row: sel.row, col: sel.col, size, model,
                              subRow: sel.subRow, subCol: sel.subCol }))
     } catch (e) {
-      setErr(e?.message ?? String(e))
+      setErr(humanError(e))
     } finally { setBusy(false) }
   }
 

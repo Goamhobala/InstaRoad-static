@@ -24,13 +24,21 @@ function client() {
 }
 
 /**
- * @param {{site: string, row: number, col: number, size: number, model: string}} sel
+ * ARITY IS LOAD-BEARING. The Space's /predict takes SEVEN positional inputs
+ * (site, row, col, size, arm, sub_row, sub_col). Passing five throws a bare
+ * `Error: TypeError` from @gradio/client with no indication of the cause --
+ * it reads exactly like a network failure, which is what it was mistaken for.
+ * Check `/gradio_api/info` if this list ever changes.
+ *
+ * @param {{site: string, row: number, col: number, size: number,
+ *          model: string, subRow?: number, subCol?: number}} sel
  * @returns {Promise<{sr: string, mask: string, overlay: string, meta: object}>}
  */
 export async function predict(sel) {
   const app = await client()
   const r = await app.predict('/predict', [
     sel.site, sel.row, sel.col, sel.size, sel.model,
+    sel.subRow ?? 0, sel.subCol ?? 0,
   ])
   const [sr, mask, overlay, meta] = r.data
   return { sr: sr?.url ?? sr, mask: mask?.url ?? mask, overlay: overlay?.url ?? overlay, meta }
