@@ -32,7 +32,12 @@ function client() {
  *
  * @param {{site: string, row: number, col: number, size: number,
  *          model: string, subRow?: number, subCol?: number}} sel
- * @returns {Promise<{sr: string, mask: string, overlay: string, meta: object}>}
+ * Returns FIVE outputs: [sr, mask, overlay, gt, meta]. The overlay is
+ * confusion-coloured against ground truth (green correct / blue missed /
+ * red false alarm) whenever GT resolves, which it does for every cell.
+ *
+ * @returns {Promise<{sr: string, mask: string, overlay: string,
+ *                    gt: string|null, meta: object}>}
  */
 export async function predict(sel) {
   const app = await client()
@@ -40,8 +45,9 @@ export async function predict(sel) {
     sel.site, sel.row, sel.col, sel.size, sel.model,
     sel.subRow ?? 0, sel.subCol ?? 0,
   ])
-  const [sr, mask, overlay, meta] = r.data
-  return { sr: sr?.url ?? sr, mask: mask?.url ?? mask, overlay: overlay?.url ?? overlay, meta }
+  const [sr, mask, overlay, gt, meta] = r.data
+  const u = (x) => (x?.url ?? x) || null
+  return { sr: u(sr), mask: u(mask), overlay: u(overlay), gt: u(gt), meta }
 }
 
 export async function wake() {

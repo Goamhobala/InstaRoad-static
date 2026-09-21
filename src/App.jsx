@@ -112,8 +112,10 @@ export default function App() {
                   Sheet — {Math.max(...site.rows) + 1}×{Math.max(...site.cols) + 1} tiles
                   {size < TILE_PX && ` · click a sub-cell`}
                 </label>
-                <Sheet site={site} cells={data.cells[site.id]} sel={sel} size={size}
-                       anchors1024={anchors} onPick={setSel} />
+                <div className="sheetwrap">
+                  <Sheet site={site} cells={data.cells[site.id]} sel={sel} size={size}
+                         anchors1024={anchors} onPick={setSel} />
+                </div>
                 <div className="legend" style={{ marginTop: 8 }}>
                   <span><i style={{ background: 'var(--blue)' }} />selected</span>
                   <span><i style={{ background: '#141b33' }} />no tile (QC)</span>
@@ -160,9 +162,37 @@ export default function App() {
                     <figcaption>super-resolved 2.5 m — what the head actually saw</figcaption>
                   </figure>
                   <figure style={{ margin: 0 }}>
-                    <img src={out.overlay} alt="prediction overlay" />
-                    <figcaption>prediction at θ* = {m.theta}</figcaption>
+                    <img src={out.overlay} alt="prediction vs ground truth" />
+                    <figcaption>
+                      <span style={{ color: '#22e678' }}>■</span> correct{'  '}
+                      <span style={{ color: '#40a0ff' }}>■</span> missed{'  '}
+                      <span style={{ color: '#ff4060' }}>■</span> false alarm
+                    </figcaption>
                   </figure>
+                  <div className="pair">
+                    {out.gt && (
+                      <figure style={{ margin: 0 }}>
+                        <img src={out.gt} alt="ground truth mask" />
+                        <figcaption>ground truth, 2.5 m</figcaption>
+                      </figure>
+                    )}
+                    {out.mask && (
+                      <figure style={{ margin: 0 }}>
+                        <img src={out.mask} alt="predicted mask" />
+                        <figcaption>predicted, θ* = {m.theta}</figcaption>
+                      </figure>
+                    )}
+                  </div>
+                  {out.meta?.scores_this_cell && (
+                    <div className="note">
+                      <strong>This cell at θ* = {m.theta}</strong> — IoU{' '}
+                      {out.meta.scores_this_cell.iou} · F1{' '}
+                      {out.meta.scores_this_cell.f1} · precision{' '}
+                      {out.meta.scores_this_cell.precision} · recall{' '}
+                      {out.meta.scores_this_cell.recall}
+                      <br /><sub>One cell, not the benchmarked split aggregate.</sub>
+                    </div>
+                  )}
                 </section>
               )}
             </>
