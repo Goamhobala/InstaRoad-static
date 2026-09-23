@@ -47,8 +47,22 @@ export default function App() {
     () => (site && data ? data.selections.sites[site.id].anchors_1024 : []),
     [site, data])
 
-  // 1024 is the one size that can be illegal everywhere in a sparse sheet.
-  const sizeLegal = (s) => s !== 1024 || anchors.length > 0
+  // Above the early returns below: the size-guard effect runs even on a render
+  // that bails out before the JSX, and would read `m` in its dead zone.
+  const m = MODELS[model]
+
+  // Two ways a size can be illegal: 1024 needs a complete 2x2 block in this
+  // sheet, and every size must be a whole number of the arm's windows -- the
+  // Space raises on anything else, so 128 is not offerable for a 256 px arm.
+  const sizeLegal = (s) => (s !== 1024 || anchors.length > 0) && s % m.windowPx === 0
+  const sizeNote = (s) => (s % m.windowPx ? `${model} runs in ${m.windowPx}px windows`
+                                          : 'no complete 2\u00d72 tile block in this sheet')
+
+  // Switching to a 256 px arm while 128 is selected would otherwise send a
+  // request the Space rejects.
+  useEffect(() => {
+    if (size % m.windowPx) setSize(SIZES.find((s) => s % m.windowPx === 0 && sizeLegal(s)) ?? 512)
+  }, [model])
 
   async function run() {
     setBusy(true); setErr(null); setOut(null)
@@ -63,7 +77,6 @@ export default function App() {
   if (err && !data) return <div style={{ padding: 24 }}>{err}</div>
   if (!data) return <div style={{ padding: 24, color: '#9aa6c4' }}>loading manifests…</div>
 
-  const m = MODELS[model]
   const st = site && SPLIT_STYLE[site.split]
   const groundKm = (size * 10) / 1000
 
@@ -100,7 +113,7 @@ export default function App() {
                   {SIZES.map((s) => (
                     <button key={s} aria-pressed={size === s} disabled={!sizeLegal(s)}
                             onClick={() => setSize(s)}
-                            title={sizeLegal(s) ? '' : 'no complete 2×2 tile block in this sheet'}>
+                            title={sizeLegal(s) ? '' : sizeNote(s)}>
                       {s}² <span style={{ color: 'var(--muted)' }}>· {(s * 10) / 1000} km</span>
                     </button>
                   ))}
